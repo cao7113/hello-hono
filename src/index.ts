@@ -1,43 +1,53 @@
 import { Hono } from "hono";
+import { logger } from "hono/logger";
+import { etag } from "hono/etag";
+import { prettyJSON } from "hono/pretty-json";
 import { html } from "hono/html";
-import { basicAuth } from "hono/basic-auth";
-import { upgradeWebSocket } from "hono/cloudflare-workers";
 
-// todo try bear auth and jwt
-// todo add swagger-ui
+const app = new Hono().get("/ping", (c) => {
+  return c.json({ msg: "Pong" });
+});
 
-const app = new Hono();
+app.use(etag(), logger());
 
 app.get("/", (c) => {
-  // plain text response
-  return c.text("Hello Hono!");
+  // return c.json({ msg: "Hello Hono!" });
+  return c.redirect("/api?pretty");
 });
 
+app.use("/api/*", prettyJSON());
+
+// curl http://localhost:8787/api?pretty
 app.get("/api", (c) => {
-  // application/json Response
   return c.json({
     ok: true,
-    message: "json API!",
+    msg: "Json API!",
   });
 });
 
-app.get("/api/hello", (c) => {
-  return c.json({
-    ok: true,
-    message: "Hello Hono!",
-  });
+// Posts
+export const postApp = new Hono()
+  .get("/ping", (c) => c.text("Pong"))
+  .get("/:id", (c) => {
+    const id = c.req.param("id");
+    c.header("X-Message", "Hi!");
+    return c.text(`post id=${id}`);
+  })
+  .post("/", (c) => c.text("Created!", 201))
+  .delete("/:id", (c) => c.text(`Post id=${c.req.param("id")} is deleted!`));
+
+app.route("/posts", postApp);
+
+// Formats
+
+app.get("/plain", (c) => {
+  return c.text("Reply plain text");
 });
 
-app.get("/posts/:id", (c) => {
-  const page = c.req.query("page") || "no-page-query-param";
-  const id = c.req.param("id");
-  c.header("X-Message", "Hi!");
-  return c.text(`You want to see ${page} of ${id}`);
+app.get("/raw", () => {
+  // Content-Type: text/plain;charset=UTF-8
+  return new Response("raw Response!");
 });
-
-app.post("/posts", (c) => c.text("Created!", 201));
-
-app.delete("/posts/:id", (c) => c.text(`${c.req.param("id")} is deleted!`));
 
 app.get("/html", (c) => {
   return c.html(
@@ -47,42 +57,12 @@ app.get("/html", (c) => {
   );
 });
 
-app.get("/raw", () => {
-  return new Response("raw Response!");
-});
+app.get("/vendor/cf-works", (c) => c.text("Hello Cloudflare Workers!"));
 
-app.use(
-  "/admin/*",
-  basicAuth({
-    username: "admin",
-    password: "secret",
-  })
-);
-
-app.get("/admin", (c) => {
-  return c.text("You are authorized!");
-});
-
-// There are Adapters for platform-dependent functions, e.g., handling static files or WebSocket. For example, to handle WebSocket in Cloudflare Workers, import hono/cloudflare-workers.
-app.get(
-  "/ws",
-  upgradeWebSocket((c) => {
-    const [client, server] = Object.values(new WebSocketPair());
-    server.accept();
-
-    server.addEventListener("message", (event) => {
-      console.log("Received message:", event.data);
-      server.send(`Echo: ${event.data}`);
-    });
-
-    return new Response(null, {
-      status: 101,
-      webSocket: client,
-    });
-  })
-);
-
-// platform-dependent functions
-app.get("/cf-works", (c) => c.text("Hello Cloudflare Workers!"));
-
+// Export final app
 export default app;
+// for cf workers
+// export default {
+//   fetch: app.fetch,
+//   scheduled: async (batch, env) => {},
+// }

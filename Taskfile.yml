@@ -1,11 +1,34 @@
 # https://taskfile.dev/usage/
 version: '3'
 tasks:
-  default: echo hi task
+  default: bun test ./test/*.test.ts
 
   # http://localhost:8787
   dev: bun run dev
-  # https://hello-hono-basic.shareup.workers.dev/
+
+  api: task openapi
+  openapi: bunx wrangler dev src/openapi.ts
+  # not work
+  openapi-bun: bun run src/openapi.ts
+
+  ## deploy on cloudflare workers
+  # https://hello-hono.shareup.workers.dev/
   dep: bun run deploy
 
+  # https://developers.cloudflare.com/workers/wrangler/
   wrangler: bunx wrangler --help
+
+  # brew install hey
+  bench: |
+    hey -n 5 -c 1 https://hello-hono.shareup.workers.dev/api/ping
+  
+  wstest: |
+    curl -i -N -H "Connection: Upgrade" -H "Upgrade: websocket" -H "Host: localhost" -H "Origin: http://localhost" http://localhost:8787/ws
+
+  setup: |
+    bun add --dev @cloudflare/workers-types
+    bun add -D @cloudflare/vitest-pool-workers
+    bun add -D vitest
+  
+  # static files in public/hello.txt
+  public-hello-txt: open http://localhost:8787/hello.txt

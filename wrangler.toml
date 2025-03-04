@@ -1,0 +1,35 @@
+# https://developers.cloudflare.com/workers/wrangler/configuration/
+name = "hello-hono"
+main = "src/openapi.ts"
+compatibility_date = "2025-02-19"
+assets = { directory = "public" }
+
+[dev]
+# ip = "192.168.1.1"
+# port = 8080
+# local_protocol = "http"
+
+# compatibility_flags = ["nodejs_compat"]
+
+# [vars]
+# MY_VAR = "my-variable"
+
+# [[kv_namespaces]]
+# binding = "MY_KV_NAMESPACE"
+# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# [[r2_buckets]]
+# binding = "MY_BUCKET"
+# bucket_name = "my-bucket"
+
+# [[d1_databases]]
+# binding = "MY_DB"
+# database_name = "my-database"
+# database_id = ""
+
+# [ai]
+# binding = "AI"
+
+# [observability]
+# enabled = true
+# head_sampling_rate = 1
