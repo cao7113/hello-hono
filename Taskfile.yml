@@ -8,8 +8,8 @@ tasks:
 
   api: task openapi
   openapi: bunx wrangler dev src/openapi.ts
-  # not work
-  openapi-bun: bun run src/openapi.ts
+  # ok after v1.2.4+, not works on 1.2.3
+  api-bun: bun run --hot src/openapi.ts
 
   ## deploy on cloudflare workers
   # https://hello-hono.shareup.workers.dev/
@@ -18,17 +18,40 @@ tasks:
   # https://developers.cloudflare.com/workers/wrangler/
   wrangler: bunx wrangler --help
 
+  ## Bun specific websocket
+  bun-ws: |
+    bun run --hot src/bun/ws.tsx
+    # http://localhost:3000
+  bun-ws-client: |
+    bun run --hot src/bun/ws-client.ts
+
+  envd: bun run --hot src/env.ts
+
+  gen-uuid: bun --print "crypto.randomUUID()"
+
+  ## Rpc
+  rpc: |
+    bun run --hot src/bun/rpc.ts
+    # http://localhost:3000
+  rpc-client: |
+    bun run src/bun/rpc-client.ts
+
+
   # brew install hey
   bench: |
-    hey -n 5 -c 1 https://hello-hono.shareup.workers.dev/api/ping
+    hey -n 5 -c 1 https://hello-hono.shareup.workers.dev/ping
   
   wstest: |
     curl -i -N -H "Connection: Upgrade" -H "Upgrade: websocket" -H "Host: localhost" -H "Origin: http://localhost" http://localhost:8787/ws
+
+  
+  # static files in public/hello.txt
+  # https://hono.dev/docs/getting-started/cloudflare-workers#serve-static-files
+  public-hello-txt: |
+    open http://localhost:8787/hello.txt
 
   setup: |
     bun add --dev @cloudflare/workers-types
     bun add -D @cloudflare/vitest-pool-workers
     bun add -D vitest
-  
-  # static files in public/hello.txt
-  public-hello-txt: open http://localhost:8787/hello.txt
+    un add -D @types/bun

@@ -11,8 +11,8 @@ assets = { directory = "public" }
 
 # compatibility_flags = ["nodejs_compat"]
 
-# [vars]
-# MY_VAR = "my-variable"
+[vars]
+TEST_ENV = "test env value in wrangler.toml"
 
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
