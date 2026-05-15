@@ -50,6 +50,15 @@ tasks:
   public-hello-txt: |
     open http://localhost:8787/hello.txt
 
+  ## templates
+  # Template to use (choices: "aws-lambda", "bun", "cloudflare-pages", "cloudflare-workers", "deno", "fastly", "lambda-edge", "netlify", "nextjs", "nodejs", "vercel", "x-basic")
+  mk-tmpls: |
+    # bun create hono --template bun --pm bun --install _local/tmpl-bun
+    bun create hono --template cloudflare-pages --pm bun --install _local/tmpl-cf-pages
+    bun create hono --template cloudflare-workers --pm bun --install _local/tmpl-cf-workers
+    # this is honox basic
+    bun create hono --template x-basic --pm bun --install _local/tmpl-x-basic
+
   setup: |
     bun add --dev @cloudflare/workers-types
     bun add -D @cloudflare/vitest-pool-workers

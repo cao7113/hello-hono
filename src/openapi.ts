@@ -165,6 +165,19 @@ const userGet = app.openapi(
   }
 );
 
+const HeadersSchema = z.object({
+  // Header keys must be in lowercase, `Authorization` is not allowed.
+  authorization: z
+    .string()
+    .describe(
+      "NOTE: set on top Authorize, NOT HERE!!! Get JWT token from login response"
+    )
+    .optional()
+    .openapi({
+      example: "Bearer xxx-JWT-SECRET",
+    }),
+});
+
 const userLogin = app.openapi(
   createRoute({
     method: "post",
@@ -232,19 +245,6 @@ const userLogin = app.openapi(
     }
   }
 );
-
-const HeadersSchema = z.object({
-  // Header keys must be in lowercase, `Authorization` is not allowed.
-  authorization: z
-    .string()
-    .describe(
-      "NOTE: set on top Authorize, NOT HERE!!! Get JWT token from login response"
-    )
-    .optional()
-    .openapi({
-      example: "Bearer xxx-JWT-SECRET",
-    }),
-});
 
 const userInfo = app.openapi(
   createRoute({
